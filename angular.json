@@ -25,9 +25,12 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "node_modules/cropperjs/src/css/cropper.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/cropperjs/src/js/cropper.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -94,5 +97,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "3f81d752-91c0-4afb-b492-5f89f7783065"
   }
 }

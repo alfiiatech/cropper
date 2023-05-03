@@ -1,0 +1,12 @@
+img{
+    display: block;
+    width: 15%;
+}
+
+button{
+    height: 20%;
+    background-color: blue;
+    border: none;
+    color: white;
+    size: 20px;
+}
