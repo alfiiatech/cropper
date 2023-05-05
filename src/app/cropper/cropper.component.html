@@ -1,6 +1,8 @@
-<div>
+<div class="container" >
   <h1>Crop this image</h1>
-  <img src="/assets/image/images.jpeg" #image id="image" alt="">
+  <div id="imageDiv"> 
+    <img #image src='/assets/image/images.jpeg' alt="image" class="cropper-image">
+  </div>
   <br>
   <button class="btn" (click)="crop()">Crop</button>
 </div>

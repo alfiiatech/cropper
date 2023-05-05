@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import Cropper from 'cropperjs';
 
 @Component({
@@ -6,75 +6,83 @@ import Cropper from 'cropperjs';
   templateUrl: './cropper.component.html',
   styleUrls: ['./cropper.component.css']
 })
-export class CropperComponent implements OnInit, AfterViewInit, OnDestroy {
-crop() {
-throw new Error('Method not implemented.');
-}
-  @ViewChild('image') imageElement!: ElementRef<HTMLImageElement>;
+
+export class CropperComponent {
+  @ViewChild('image', { read: ElementRef }) image!: ElementRef;
 
   private cropper!: Cropper;
 
-  constructor(private readonly elementRef: ElementRef) { }
-
-  ngOnInit(): void { }
-
   ngAfterViewInit() {
-    const image = this.imageElement.nativeElement;
-    this.cropper = new Cropper(image, {
-      aspectRatio: 16 / 9,
-      crop(event) {
-        console.log("x:",event.detail.x);
-        console.log("y;",event.detail.y);
-        console.log("width:",event.detail.width);
-        console.log(event.detail.height);
-        console.log(event.detail.rotate);
-        console.log(event.detail.scaleX);
-        console.log(event.detail.scaleY);
-      },
+    this.cropper = new Cropper(this.image.nativeElement, {
+      aspectRatio: 1,
+      viewMode: 3,
+      autoCropArea: 1,
+      dragMode: 'move'
     });
 
-    const canvas = this.cropper.getCroppedCanvas();
-    const context = canvas.getContext('2d');
+  }
 
-    if (!context) {
-      console.error('Could not get 2d context for canvas');
-      return;
-    }
+
+
+  crop() {
+    const canvas = this.cropper.getCroppedCanvas();
+    const dataURL = canvas.toDataURL();
+    canvas.style.display = "none";
+
+    const file = this.dataURLtoFile(dataURL, 'croppedImage.png');
+    console.log(file);
+    // localStorage.setItem("image ", 'croppedImage.png');
+    // console.log(localStorage)
 
     const cropBoxData = this.cropper.getCropBoxData();
-    const cropBoxLeft = cropBoxData.left;
-    const cropBoxTop = cropBoxData.top;
-    const cropBoxWidth = cropBoxData.width;
-    const cropBoxHeight = cropBoxData.height;
+    console.log("cropdata", cropBoxData);
+    this.cropper.setCropBoxData({
+      left: cropBoxData.left,
+      top: cropBoxData.top,
+      width: cropBoxData.width,
+      height: cropBoxData.height
+    });
 
-    const imageData = context.getImageData(cropBoxLeft, cropBoxTop, cropBoxWidth, cropBoxHeight);
-    const data = imageData.data;
 
-    for (let y = 0; y < cropBoxHeight; y++) {
-      for (let x = 0; x < cropBoxWidth; x++) {
-        const pixelIndex = (y  *cropBoxWidth + x)  *4;
-        const r = data[pixelIndex];
-        const g = data[pixelIndex + 1];
-        const b = data[pixelIndex + 2];
-        const gray = (r + g + b) / 3;
-        data[pixelIndex] = gray;
-        data[pixelIndex + 1] = gray;
-        data[pixelIndex + 2] = gray;
-      }
-    }
+    const divPosition = document.getElementById('imageDiv');
+    const imageTop: any = divPosition?.offsetTop;
+    const imageLeft: any = divPosition?.offsetLeft;
 
-    context.putImageData(imageData, cropBoxLeft, cropBoxTop);
-    const url = canvas.toDataURL();
-    localStorage.setItem('croppedImage', url);
-    this.cropper.replace(url);
-    this.cropper.disable();
+    console.log("top", imageTop);
+    console.log("left", imageLeft);
+
+
+    const croppedElement = document.createElement('div');
+    croppedElement.style.position = 'absolute';
+    croppedElement.style.top = (imageTop + this.cropper.getCropBoxData().top) + 'px';
+    croppedElement.style.left = (imageLeft + this.cropper.getCropBoxData().left) + 'px';
+    croppedElement.style.width = this.cropper.getCropBoxData().width + 'px';
+    croppedElement.style.height = this.cropper.getCropBoxData().height + 'px';
+    croppedElement.style.backgroundColor = 'gray';
+    croppedElement.classList.add('cropped-card');
+
+    const container = this.image.nativeElement.parentElement;
+    container.appendChild(croppedElement);
 
 
   }
 
-  ngOnDestroy() {
-    if (this.cropper) {
-      this.cropper.destroy();
+
+  private dataURLtoFile(dataURL: string, filename: string): File {
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
     }
+
+    return new File([u8arr], filename, { type: mime });
   }
+}
+
+function useRef<T>(arg0: null) {
+  throw new Error('Function not implemented.');
 }
