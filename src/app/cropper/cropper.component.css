@@ -16,11 +16,8 @@ button {
     size: 20px;
 }
 
-.cropper-crop-box {
-    background-color: brown;
+#cropped-card{
+    position: absolute;
+    background-color: gray;
 }
 
-.ng-cropper .cropper-view-box {
-    border: 1px solid red !important;
-    background: none !important;
-}
