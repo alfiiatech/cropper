@@ -11,7 +11,6 @@ export class LocalService {
 
   setItem(key: string, value: any): void {
     localStorage.setItem(key, value);
-    // localStorage.clear();
 
   }
 

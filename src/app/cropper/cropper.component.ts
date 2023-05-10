@@ -37,7 +37,7 @@ export class CropperComponent implements AfterViewInit, OnInit {
       ready: (event: any) => {
         setTimeout(() => {
           this.restoreCroppedElements();
-          this.saveCroppedElement();
+          // this.saveCroppedElement();
         },);
 
       }
@@ -46,14 +46,28 @@ export class CropperComponent implements AfterViewInit, OnInit {
 
   saveCroppedElement() {
     const cropBoxData = this.cropper.getCropBoxData();
-    const croppedElement = {
+    const NewCroppedElement = {
       top: cropBoxData.top,
       left: cropBoxData.left,
       width: cropBoxData.width,
       height: cropBoxData.height,
       color: 'gray'
     };
-    this.croppedImages.push(croppedElement);
+
+    const isAlreadySaved = this.croppedImages.some(croppedElement => {
+      return (
+        croppedElement.top === NewCroppedElement.top &&
+        croppedElement.left === NewCroppedElement.left &&
+        croppedElement.width === NewCroppedElement.width &&
+        croppedElement.height === NewCroppedElement.height
+      );
+    });
+
+    if (isAlreadySaved) {
+      return
+    }
+    this.croppedImages.push(NewCroppedElement);
+    // this.croppedImages.push(croppedElement);
     this.localService.setItem('croppedImages', JSON.stringify(this.croppedImages));
   }
 
@@ -63,14 +77,14 @@ export class CropperComponent implements AfterViewInit, OnInit {
       this.croppedImages = JSON.parse(storedCroppedElements);
 
       const divPosition = document.getElementById('imageDiv');
-      const imageTop: any = divPosition?.offsetTop;
-      const imageLeft: any = divPosition?.offsetLeft;
+      // const imageTop: any = divPosition?.offsetTop;
+      // const imageLeft: any = divPosition?.offsetLeft;
 
       this.croppedImages.forEach((croppedElement) => {
         const newCroppedElement = document.createElement('div');
         newCroppedElement.style.position = 'absolute';
-        newCroppedElement.style.top =  croppedElement.top + 'px';
-        newCroppedElement.style.left = croppedElement.left + 'px';
+        newCroppedElement.style.top = (croppedElement.top) + 'px';
+        newCroppedElement.style.left = (croppedElement.left) + 'px';
         newCroppedElement.style.width = croppedElement.width + 'px';
         newCroppedElement.style.height = croppedElement.height + 'px';
         newCroppedElement.style.backgroundColor = 'gray';
@@ -91,39 +105,46 @@ export class CropperComponent implements AfterViewInit, OnInit {
 
 
   crop() {
-    const canvas = this.cropper.getCroppedCanvas();
-    const dataURL = canvas.toDataURL();
-    canvas.style.display = 'none';
 
     const cropBoxData = this.cropper.getCropBoxData();
     const divPosition = document.getElementById('imageDiv');
     const imageTop: any = divPosition?.offsetTop;
     const imageLeft: any = divPosition?.offsetLeft;
-
     const croppedElement = {
       top: imageTop + cropBoxData.top,
       left: imageLeft + cropBoxData.left,
       width: cropBoxData.width,
       height: cropBoxData.height,
-    };
-
-    const newCroppedElement = document.createElement('div');
-    newCroppedElement.style.position = 'absolute';
-    newCroppedElement.style.top = croppedElement.top + 'px';
-    newCroppedElement.style.left = croppedElement.left + 'px';
-    newCroppedElement.style.width = croppedElement.width + 'px';
-    newCroppedElement.style.height = croppedElement.height + 'px';
-    newCroppedElement.style.backgroundColor = 'gray';
-    newCroppedElement.classList.add('cropped-card');
-
-    const container = this.image.nativeElement.parentElement;
-    container.appendChild(newCroppedElement);
-
-    this.croppedImages.push(croppedElement);
-    this.localService.setItem('croppedImages', JSON.stringify(this.croppedImages));
-
+    }
+    const canvas = this.cropper.getCroppedCanvas();
+    const dataURL = canvas.toDataURL();
+    canvas.style.display = 'none';
+    const isCropped = this.croppedImages.some((item) => {
+      return (
+        item.top === croppedElement.top &&
+        item.left === croppedElement.left &&
+        item.width === croppedElement.width &&
+        item.height === croppedElement.height
+      );
+    });
+    if (!isCropped) {
+      const newCroppedElement = document.createElement('div');
+      newCroppedElement.style.position = 'absolute';
+      newCroppedElement.style.top = croppedElement.top + 'px';
+      newCroppedElement.style.left = croppedElement.left + 'px';
+      newCroppedElement.style.width = croppedElement.width + 'px';
+      newCroppedElement.style.height = croppedElement.height + 'px';
+      newCroppedElement.style.backgroundColor = 'gray';
+      newCroppedElement.classList.add('cropped-card');
+      const container = this.image.nativeElement.parentElement;
+      container.appendChild(newCroppedElement);
+      this.croppedImages.push(croppedElement);
+      this.localService.setItem('croppedImages', JSON.stringify(this.croppedImages));
+    }
     this.cropper.reset();
   }
 
-  
+
+
+
 }
