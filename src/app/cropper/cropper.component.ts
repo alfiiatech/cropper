@@ -54,18 +54,20 @@ export class CropperComponent implements AfterViewInit, OnInit {
       color: 'gray'
     };
 
-    const isAlreadySaved = this.croppedImages.some(croppedElement => {
-      return (
-        croppedElement.top === NewCroppedElement.top &&
-        croppedElement.left === NewCroppedElement.left &&
-        croppedElement.width === NewCroppedElement.width &&
-        croppedElement.height === NewCroppedElement.height
-      );
+    const isAlreadySaved = this.croppedImages.some((croppedElement) => {
+      const isOverlap =
+        croppedElement.left < NewCroppedElement.left + NewCroppedElement.width &&
+        croppedElement.left + croppedElement.width > NewCroppedElement.left &&
+        croppedElement.top < NewCroppedElement.top + NewCroppedElement.height &&
+        croppedElement.top + croppedElement.height > NewCroppedElement.top;
+  
+      return isOverlap;
     });
-
+  
     if (isAlreadySaved) {
-      return
+      return;
     }
+  
     this.croppedImages.push(NewCroppedElement);
     // this.croppedImages.push(croppedElement);
     this.localService.setItem('croppedImages', JSON.stringify(this.croppedImages));
@@ -76,7 +78,7 @@ export class CropperComponent implements AfterViewInit, OnInit {
     if (storedCroppedElements) {
       this.croppedImages = JSON.parse(storedCroppedElements);
 
-      const divPosition = document.getElementById('imageDiv');
+      // const divPosition = document.getElementById('imageDiv'); 
       // const imageTop: any = divPosition?.offsetTop;
       // const imageLeft: any = divPosition?.offsetLeft;
 
@@ -120,13 +122,18 @@ export class CropperComponent implements AfterViewInit, OnInit {
     const dataURL = canvas.toDataURL();
     canvas.style.display = 'none';
     const isCropped = this.croppedImages.some((item) => {
-      return (
-        item.top === croppedElement.top &&
-        item.left === croppedElement.left &&
-        item.width === croppedElement.width &&
-        item.height === croppedElement.height
-      );
+      const isOverlap =
+        item.left < croppedElement.left + croppedElement.width &&
+        item.left + item.width > croppedElement.left &&
+        item.top < croppedElement.top + croppedElement.height &&
+        item.top + item.height > croppedElement.top;
+  
+      return isOverlap;
     });
+  
+    if (isCropped) {
+      return;
+    }
     if (!isCropped) {
       const newCroppedElement = document.createElement('div');
       newCroppedElement.style.position = 'absolute';
